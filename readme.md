@@ -1,0 +1,10 @@
+Contract creation transaction id: 0xc92376f4c718b5f009b9755bf92db5e31a6f8faf3640784f559f996bb2ac14ac
+
+Contract Address: 0x47239e7f1a12f9d6385bd9cb93d4522e423f971e
+
+createStar transaction id: https://rinkeby.etherscan.io/tx/0xb60336c7ed4d0d5049dabf1e710f6565ec647365cf41ed1acc3c3a62cd912d6b
+
+putStarUpForSale transaction id: https://rinkeby.etherscan.io/tx/0xbfbe95aa29b7e6984ba6be29590126bd4d959e95bc2cd56573b26d1100aa7e55
+
+tokenId: 12345
+tokenPrice: 1000

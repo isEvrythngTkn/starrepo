@@ -1,6 +1,6 @@
 pragma solidity ^0.4.25;
 
-import 'penzeppelin-solidity/contracts/token/ERC721/ERC721.sol';
+import 'penzeppelin-solidity/contracts/token/ERC721/ERC721Mintable.sol';
 
 contract StarNotary is ERC721 { 
 

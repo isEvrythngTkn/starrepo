@@ -7,6 +7,7 @@
         <link rel="stylesheet" type="text/css" href="style.css">
 
         <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     </head>
 
     <body>
@@ -15,135 +16,121 @@
 
             <div class="row">
                 <label class="bold">Star Name:</label>
-                <label id="star-name"></label>
+                <input type="text" name="name">
             </div>
 
             <div class="row">
-                <label class="bold">Star Owner:</label>
-                <label id="star-owner"></label>
+                <label class="bold">Story:</label>
+                <input type="text" name="story">
             </div>
 
-            <button id="claim-button" onclick="claimButtonClicked()">Claim Star</button>
+            <div class="row">
+                <label class="bold">Token ID:</label>
+                <input type="text" name="token_id">
+            </div>
+
+            <div class="row">
+                <label class="bold">Dec:</label>
+                <input type="text" name="dec">
+            </div>
+
+            <div class="row">
+                <label class="bold">Mag:</label>
+                <input type="text" name="mag">
+            </div>
+
+            <div class="row">
+                <label class="bold">Cent:</label>
+                <input type="text" name="cent">
+            </div>
+
+            <button id="create-button">Claim Star</button>
+            <div id="star-creation-success"></div>
+
+            <br/><br/><br/><br/>
+            
+            <div class="row">
+                <label class="bold">Token ID:</label>
+                <input type="text" name="lookup_token_id">
+            </div>
+            
+            <button id="lookup-button">Lookup Star</button>
+            <div id="lookup-results"></div>
         </div>
 
-        <script>    
-         
-            if(typeof web3 != 'undefined') { 
-                web3 = new Web3(web3.currentProvider) // what Metamask injected 
-            } else {
-                // Instantiate and set Ganache as your provider
-                web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-            }
-
-            // The default (top) wallet account from a list of test accounts 
-            web3.eth.defaultAccount = web3.eth.accounts[0];
-
-            // The interface definition for your smart contract (the ABI) 
-            var StarNotary = web3.eth.contract(
-                [
-                    {
-                        "constant": false,
-                        "inputs": [],
-                        "name": "claimStar",
-                        "outputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "function"
-                    },
-                    {
-                        "anonymous": false,
-                        "inputs": [
-                            {
-                                "indexed": false,
-                                "name": "owner",
-                                "type": "address"
-                            }
-                        ],
-                        "name": "starClaimed",
-                        "type": "event"
-                    },
-                    {
-                        "inputs": [],
-                        "payable": false,
-                        "stateMutability": "nonpayable",
-                        "type": "constructor"
-                    },
-                    {
-                        "constant": true,
-                        "inputs": [],
-                        "name": "starName",
-                        "outputs": [
-                            {
-                                "name": "",
-                                "type": "string"
-                            }
-                        ],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
-                    },
-                    {
-                        "constant": true,
-                        "inputs": [],
-                        "name": "starOwner",
-                        "outputs": [
-                            {
-                                "name": "",
-                                "type": "address"
-                            }
-                        ],
-                        "payable": false,
-                        "stateMutability": "view",
-                        "type": "function"
+        <script>
+            $.getJSON('https://api.myjson.com/bins/vb9ns')
+                .done(function (contractJSON) {
+                    var localContractAddress = '0xe6d7d1e13e7a546bf614ec167b7b7279dae31b2f';
+                    var rinkebyContractAddress = '0x47239e7f1a12f9d6385bd9cb93d4522e423f971e';
+                    var contractAddress;
+                    if(typeof web3 != 'undefined') { 
+                        web3 = new Web3(web3.currentProvider) // what Metamask injected 
+                        contractAddress = rinkebyContractAddress;
+                    } else {
+                        // Instantiate and set Ganache as your provider
+                        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+                        contractAddress = localContractAddress;
                     }
-                ]
-            );
-            // Grab the contract at specified deployed address with the interface defined by the ABI
-            var starNotary = StarNotary.at('0x8040086095e9bc41535094bf03eae1f6178b5260');
-            
-            // Get and display star name
-            starNotary.starName(function (error, result) {
-                if (!error) {
-                    document.getElementById('star-name').innerText = result
-                } else { 
-                    console.log(error);
-                }
-            });
 
-            // Get and display star owner
-            starNotary.starOwner(function (error, result) {
-                if (!error) {
-                    document.getElementById('star-owner').innerText = result
-                } else { 
-                    console.log(error);
-                }
-            });
-
-            // Enable claim button being clicked
-            function claimButtonClicked() { 
-                web3.eth.getAccounts(function(error, accounts) { 
-                    if (error) { 
-                        console.log(error)
-                        return
-                    }
-                    var account = accounts[0]
-                    starNotary.claimStar(function (error, result) {
-                        if (!error) {
-                            var starClaimedEvent = starNotary.starClaimed({from: account});
-                            starClaimedEvent.watch(function(error, result) {
+                    web3.eth.defaultAccount = web3.eth.accounts[0];
+                    var StarNotary = web3.eth.contract(contractJSON.abi);
+                    var starNotary = StarNotary.at(contractAddress);
+                    
+                    $('#create-button').click(function() { 
+                        web3.eth.getAccounts(function(error, accounts) { 
+                            if (error) { 
+                                console.log(error)
+                                return
+                            }
+                            
+                            var name = $('input[name="name"]').val();
+                            var story = $('input[name="story"]').val();
+                            var token_id = $('input[name="token_id"]').val();
+                            var dec = $('input[name="dec"]').val();
+                            var mag = $('input[name="mag"]').val();
+                            var cent = $('input[name="cent"]').val();
+                            
+                            console.log(name, story, token_id, dec, mag, cent);
+                            
+                            var account = accounts[0];
+                            starNotary.createStar(name, token_id, story, dec, mag, cent, {from: account}, function (error, result) {
                                 if (!error) {
-                                    location.reload();
-                                } else {
-                                    console.log('watching for star claimed event is failing');
+                                    console.log('star created', result);
+                                    $('#star-creation-success').text('Star successfully created. Transaction id: ' + result);
+                                } else { 
+                                    console.log(error);
                                 }
                             });
-                        } else { 
-                            console.log(error);
-                        }
+                        
+                        });
                     });
-                   
-                })
-            }
+
+                    $('#lookup-button').click(function() {
+                        console.log('lookup clicked');
+                        web3.eth.getAccounts(function(error, accounts) { 
+                            if (error) { 
+                                console.log(error)
+                                return
+                            }
+                            
+                            var lookup_token_id = $('input[name="lookup_token_id"]').val();
+                            var account = accounts[0];
+
+                            starNotary.tokenIdToStarInfo(lookup_token_id, {from: account}, function (error, result) {
+                                if(!error) {
+                                    console.log('looked up!', result);
+                                    $('#lookup-results').text(result);
+                                } else {
+                                    console.log('error', error);
+                                }
+                            });
+                        });
+
+                    });
+
+                });
+            
         </script>
     </body>
 </html>
